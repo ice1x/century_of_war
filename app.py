@@ -12,8 +12,7 @@ from pathlib import Path
 import streamlit as st
 import fetch_wars
 import wars_gantt
-
-CSV_FILE = "wars.csv"
+from config import CSV_FILE
 
 st.set_page_config(page_title="Wars Timeline 1900–2026", page_icon="⚔️", layout="wide")
 
