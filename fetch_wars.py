@@ -13,17 +13,7 @@ import csv
 import requests
 from bs4 import BeautifulSoup, Tag
 
-HEADERS      = {"User-Agent": "WarsTimelineBot/1.0 (educational project)"}
-BASE_URL     = "https://en.wikipedia.org"
-CURRENT_YEAR = 2026
-OUTPUT_FILE  = "wars.csv"
-
-LIST_PAGES = [
-    "/wiki/List_of_wars:_1900%E2%80%931944",
-    "/wiki/List_of_wars:_1945%E2%80%931989",
-    "/wiki/List_of_wars:_1990%E2%80%932002",
-    "/wiki/List_of_wars:_2003%E2%80%93present",
-]
+from config import HEADERS, BASE_URL, CURRENT_YEAR, CSV_FILE, LIST_PAGES
 
 
 def _clean(cell: Tag) -> str:
@@ -168,7 +158,7 @@ def _scrape_page(path: str, log=print) -> list[dict]:
     return wars
 
 
-def run(output_file: str = OUTPUT_FILE, log=print) -> int:
+def run(output_file: str = CSV_FILE, log=print) -> int:
     log("Scraping Wikipedia war lists...")
     all_wars: list[dict] = []
     seen:     set[str]   = set()
