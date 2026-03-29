@@ -30,6 +30,10 @@ class TestGuessRegion:
         ("Franco-Prussian aftermath", "Europe"),
         ("Balkan Wars", "Europe"),
         ("Spanish Civil War", "Europe"),
+        ("Troubles", "Europe"),
+        ("Chechen War", "Europe"),
+        ("Kosovo War", "Europe"),
+        ("Croatian War of Independence", "Europe"),
     ])
     def test_europe(self, name, expected):
         assert wars_gantt._guess_region(name) == expected
@@ -73,6 +77,11 @@ class TestGuessRegion:
         ("Liberian Civil War", "Africa"),
         ("Sierra Leone Civil War", "Africa"),
         ("Algerian War", "Africa"),
+        ("Somali Civil War", "Africa"),
+        ("Darfur conflict", "Africa"),
+        ("Biafran War", "Africa"),
+        ("Boko Haram insurgency", "Africa"),
+        ("Rhodesian Bush War", "Africa"),
     ])
     def test_africa(self, name, expected):
         assert wars_gantt._guess_region(name) == expected
@@ -85,6 +94,11 @@ class TestGuessRegion:
         ("Guatemalan Civil War", "Americas"),
         ("Haitian Revolution aftermath", "Americas"),
         ("American Civil Rights era", "Americas"),
+        ("Mexican Revolution", "Americas"),
+        ("Falklands War", "Americas"),
+        ("FARC insurgency", "Americas"),
+        ("Venezuelan crisis", "Americas"),
+        ("Argentine dirty war", "Americas"),
     ])
     def test_americas(self, name, expected):
         assert wars_gantt._guess_region(name) == expected
@@ -115,17 +129,17 @@ class TestGuessRegion:
         assert wars_gantt._guess_region("gulf war") == "Middle East"
 
     # Document known misclassifications as baseline for future improvements
-    @pytest.mark.parametrize("name,actual_region,note", [
-        ("Boxer Rebellion", "Other", "Should be Asia — no 'china' keyword in name"),
-        ("Mau Mau Uprising", "Other", "Should be Africa — no Africa keyword in name"),
-        ("Falklands War", "Other", "Should be Americas — no Americas keyword in name"),
-        ("Troubles", "Other", "Should be Europe — no Europe keyword in name"),
-        ("Somali Civil War", "Other", "Should be Africa — 'somali' not in keywords, only 'somalia'"),
-        ("Mexican Revolution", "Other", "Should be Americas — 'mexican' not in keywords, only 'mexico'"),
+    @pytest.mark.parametrize("name,expected", [
+        ("Boxer Rebellion", "Asia"),
+        ("Mau Mau Uprising", "Africa"),
+        ("Falklands War", "Americas"),
+        ("Troubles", "Europe"),
+        ("Somali Civil War", "Africa"),
+        ("Mexican Revolution", "Americas"),
     ])
-    def test_known_misclassifications(self, name, actual_region, note):
-        """Document current misclassifications as regression baseline."""
-        assert wars_gantt._guess_region(name) == actual_region
+    def test_previously_misclassified_now_fixed(self, name, expected):
+        """These were previously classified as 'Other', now correctly detected."""
+        assert wars_gantt._guess_region(name) == expected
 
 
 # ── load_data ─────────────────────────────────────────────────────────────────
@@ -161,7 +175,7 @@ class TestLoadData:
     def test_columns_present(self, sample_csv):
         wars_gantt.load_data.clear()
         df = wars_gantt.load_data(str(sample_csv))
-        expected_cols = {"name", "start_year", "end_year", "duration", "region", "wiki_url"}
+        expected_cols = {"name", "start_year", "end_year", "duration", "region", "wiki_url", "display_end"}
         assert expected_cols.issubset(set(df.columns))
 
     def test_duration_calculated(self, sample_csv):
@@ -175,6 +189,20 @@ class TestLoadData:
         df = wars_gantt.load_data(str(sample_csv))
         zd = df[df["name"] == "Zero Duration War"].iloc[0]
         assert zd["duration"] == 0
+
+    def test_display_end_for_zero_duration(self, sample_csv):
+        """Zero-duration wars get display_end = start_year + 1 for visibility."""
+        wars_gantt.load_data.clear()
+        df = wars_gantt.load_data(str(sample_csv))
+        zd = df[df["name"] == "Zero Duration War"].iloc[0]
+        assert zd["display_end"] == zd["start_year"] + 1
+
+    def test_display_end_for_normal_duration(self, sample_csv):
+        """Normal wars keep display_end == end_year."""
+        wars_gantt.load_data.clear()
+        df = wars_gantt.load_data(str(sample_csv))
+        ww1 = df[df["name"] == "World War I"].iloc[0]
+        assert ww1["display_end"] == ww1["end_year"]
 
     def test_region_assigned(self, sample_csv):
         wars_gantt.load_data.clear()

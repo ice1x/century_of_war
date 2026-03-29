@@ -23,22 +23,58 @@ REGION_COLORS = {
 }
 
 REGION_KEYWORDS = {
-    "Europe":      ["europe","european","balkan","greek","yugoslav","russian",
-                    "ukrainian","polish","german","french","spain","spanish"],
+    "Europe":      ["europe","european","balkan","greek","greece","yugoslav",
+                    "russian","russia","ukrainian","ukrain","polish","poland",
+                    "german","germany","french","france","spain","spanish",
+                    "italian","italy","british","britain","irish","ireland",
+                    "finnish","finland","hungarian","hungary","romanian","romania",
+                    "bulgarian","bulgaria","serbian","serbia","croatian","croatia",
+                    "bosnian","bosnia","czech","slovak","austria","dutch",
+                    "netherlands","belgian","belgium","swedish","norway",
+                    "norwegian","danish","denmark","swiss","portugal","portuguese",
+                    "albanian","albania","macedon","montenegr","moldov",
+                    "baltic","latvian","lithuanian","estonian","chechen",
+                    "chechnya","kosovo","crimea","cyprus","troubles"],
     "Middle East": ["arab","iraq","iran","persian","israel","israeli","lebanese",
-                    "syrian","yemeni","gulf","ottoman","turkey","turkish",
-                    "afghan","afghanistan"],
-    "Asia":        ["china","chinese","korean","vietnam","vietnamese","india",
-                    "indian","pakistan","burm","cambodia","laos","thailand",
-                    "indonesia","malay","philippine","sino","japan","japanese"],
-    "Africa":      ["africa","african","ethiopia","somalia","sudan","congo",
-                    "angola","mozambique","rwanda","liberia","sierra leone",
-                    "nigeria","egypt","algeri","libya","kenya","zimbabwe"],
-    "Americas":    ["america","american","colombia","mexico","peru","bolivia",
-                    "panama","cuba","dominican","haiti","central america",
-                    "nicaragu","guatemal"],
-    "Pacific":     ["pacific","papua","samoa","fiji","hawaii"],
-    "Global":      ["world war","cold war","global"],
+                    "lebanon","syrian","syria","yemeni","yemen","gulf","ottoman",
+                    "turkey","turkish","afghan","afghanistan","kurd","kurdish",
+                    "palestinian","palesti","hezbollah","houthi","bahrain",
+                    "qatar","saudi","jordan","oman","emirat"],
+    "Asia":        ["china","chinese","korean","korea","vietnam","vietnamese",
+                    "india","indian","pakistan","burm","myanmar","cambodia",
+                    "cambodian","laos","laotian","thailand","thai","indonesia",
+                    "indonesian","malay","philippine","filipino","sino",
+                    "japan","japanese","tibet","tibetan","taiwan","formosa",
+                    "bangladesh","bengal","nepal","sri lank","ceylon",
+                    "kashmir","xinjiang","uyghur","khmer","hmong","moro",
+                    "boxer rebellion","taiping","sikh","assam","manipur",
+                    "naxal","tamil"],
+    "Africa":      ["africa","african","ethiopia","ethiopian","somali","somalia",
+                    "sudan","sudanese","congo","congolese","angola","angolan",
+                    "mozambi","rwanda","rwandan","liberia","liberian",
+                    "sierra leone","nigeria","nigerian","egypt","egyptian",
+                    "algeri","libya","libyan","kenya","kenyan","zimbabwe",
+                    "uganda","ugandan","chad","chadian","mali","malian",
+                    "eritrea","eritrean","burundi","cameroon","central african",
+                    "ivory coast","ghana","senegal","niger ","namibia",
+                    "south africa","morocco","moroccan","tunisia","tunisian",
+                    "darfur","sahara","sahel","mau mau","biafra","boko haram",
+                    "hutu","tutsi","zulu","boer","rhodesia","madagascar",
+                    "mozambique"],
+    "Americas":    ["america","american","colombia","colombian","mexico",
+                    "mexican","peru","peruvian","bolivia","bolivian","panama",
+                    "cuba","cuban","dominican","haiti","haitian",
+                    "central america","nicaragu","guatemal","hondur",
+                    "el salvador","salvadoran","venezuela","venezuelan",
+                    "chile","chilean","argentin","brazil","brazilian",
+                    "ecuador","ecuadori","paraguayan","paraguay","uruguay",
+                    "falkland","malvinas","farc","contra","zapatist",
+                    "canad","puerto ric","jamaica"],
+    "Pacific":     ["pacific","papua","samoa","fiji","hawaii","solomon islands",
+                    "new zealand","australia","australian","timor","bougainville",
+                    "oceani","mariana","midway","guadalcanal","iwo jima",
+                    "okinawa"],
+    "Global":      ["world war","cold war","global","war on terror"],
 }
 
 
@@ -57,6 +93,7 @@ def load_data(csv_path: str = "wars.csv") -> pd.DataFrame:
     df["start_year"] = df["start_year"].astype(int)
     df["end_year"]   = df["end_year"].astype(int)
     df["duration"]   = df["end_year"] - df["start_year"]
+    df["display_end"] = df["end_year"].where(df["duration"] > 0, df["start_year"] + 1)
     df["region"]     = df["name"].apply(_guess_region)
     df["wiki_url"]   = df.get("wiki_url", "").fillna("")
     df = df[(df["start_year"] >= 1900) & (df["start_year"] <= CURRENT_YEAR)]
@@ -92,7 +129,7 @@ def render(df: pd.DataFrame) -> None:
 
     # Clip bar edges to selected window, ensure minimum visible width
     filtered["bar_start"] = filtered["start_year"].clip(lower=year_range[0])
-    filtered["bar_end"]   = filtered["end_year"].clip(upper=year_range[1])
+    filtered["bar_end"]   = filtered["display_end"].clip(upper=year_range[1])
     filtered["bar_len"]   = (filtered["bar_end"] - filtered["bar_start"]).clip(lower=0.4)
     filtered = filtered.sort_values(["region", "start_year"]).reset_index(drop=True)
 
@@ -137,12 +174,13 @@ def render(df: pd.DataFrame) -> None:
         show_leg = row["region"] not in region_shown
         region_shown.add(row["region"])
 
+        dur_text = "< 1 year" if row["duration"] == 0 else f"{int(row['duration'])} years"
         hover = (
             f"<b>{row['name']}</b><br>"
             f"Region: {row['region']}<br>"
             f"Start:    {int(row['start_year'])}<br>"
             f"End:      {int(row['end_year'])}<br>"
-            f"Duration: {int(row['duration'])} years"
+            f"Duration: {dur_text}"
         )
         if row["wiki_url"]:
             hover += "<br><span style='color:#c8a882'>click to open Wikipedia ↗</span>"
