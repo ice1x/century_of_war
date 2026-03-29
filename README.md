@@ -2,6 +2,8 @@
 
 Interactive timeline visualization of 1,000+ military conflicts from 1900 to present day.
 
+**Live demo:** https://century-of-war.streamlit.app/
+
 ![Python](https://img.shields.io/badge/Python-3.10+-blue)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.0+-red)
 ![License](https://img.shields.io/badge/License-MIT-green)
