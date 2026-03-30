@@ -70,7 +70,8 @@ def render(df: pd.DataFrame) -> None:
     # ── Metrics ───────────────────────────────────────────────────────────────
     total    = len(filtered)
     avg_dur  = round(filtered["duration"].mean(), 1) if total else 0
-    most_reg = filtered["region"].value_counts().idxmax() if total else "—"
+    classified = filtered[filtered["region"] != "Other"]["region"].value_counts()
+    most_reg = classified.idxmax() if not classified.empty else "—"
     longest  = filtered.loc[filtered["duration"].idxmax(), "name"] if total else "—"
 
     c1, c2, c3, c4 = st.columns(4)
