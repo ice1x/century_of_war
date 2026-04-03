@@ -141,6 +141,61 @@ class TestGuessRegion:
         """These were previously classified as 'Other', now correctly detected."""
         assert wars_gantt._guess_region(name) == expected
 
+    # Round 2: conflicts reclassified from Other via expanded keywords
+    @pytest.mark.parametrize("name,expected", [
+        # Europe
+        ("Spartacist uprising", "Europe"),
+        ("Transnistria War", "Europe"),
+        ("War in Abkhazia (1992–1993)", "Europe"),
+        ("Beer Hall Putsch", "Europe"),
+        ("Easter Rising", "Europe"),
+        ("Winter War", "Europe"),
+        ("Ten-Day War", "Europe"),
+        ("Ilinden–Preobrazhenie Uprising", "Europe"),
+        # Middle East
+        ("Second Intifada", "Middle East"),
+        ("Waziristan campaign (1919–1920)", "Middle East"),
+        ("Sheikh Said rebellion", "Middle East"),
+        ("Ararat rebellion", "Middle East"),
+        ("Young Turk Revolution", "Middle East"),
+        ("Taliban insurgency", "Middle East"),
+        ("Gaza War", "Middle East"),
+        ("Islamic State–Taliban conflict", "Middle East"),
+        # Asia
+        ("Xinhai Revolution", "Asia"),
+        ("Eelam War I", "Asia"),
+        ("Darul Islam rebellion", "Asia"),
+        ("Siege of Marawi", "Asia"),
+        ("Ili Rebellion", "Asia"),
+        ("Gwangju Uprising", "Asia"),
+        ("Jeju uprising", "Asia"),
+        ("Basmachi movement", "Asia"),
+        # Africa
+        ("Herero Wars", "Africa"),
+        ("Maji Maji Rebellion", "Africa"),
+        ("Tuareg rebellion (1962–1964)", "Africa"),
+        ("Simba rebellion", "Africa"),
+        ("Zanzibar Revolution", "Africa"),
+        ("Bondelswarts Rebellion", "Africa"),
+        ("Ifni War", "Africa"),
+        # Americas
+        ("Bay of Pigs Invasion", "Americas"),
+        ("Chaco War", "Americas"),
+        ("Cristero War", "Americas"),
+        ("Dirty War", "Americas"),
+        ("Rupununi Uprising", "Americas"),
+        # Pacific
+        ("Coconut War", "Pacific"),
+        ("Emu War", "Pacific"),
+        # Global
+        ("Gallipoli campaign", "Global"),
+        ("Yom Kippur War", "Global"),
+        ("Suez Crisis", "Global"),
+    ])
+    def test_expanded_classification(self, name, expected):
+        """Conflicts reclassified from Other via expanded keyword set."""
+        assert wars_gantt._guess_region(name) == expected
+
 
 # ── load_data ─────────────────────────────────────────────────────────────────
 
